@@ -36,29 +36,22 @@ async function getProductById(id) {
   });
 }
 
-function updateProductById(id, updatedProduct) {
-  return new Promise((resolve, reject) => {
+function updateProduct(id, updateProduct) {
+  return new Promise((resolve, _) => {
     getDB()
       .then((db) =>
-        db.collection(productsCollectionName).findOneAndUpdate(
-          { _id: ObjectId(id) },
-          { $set: updatedProduct },
-          // $set: {
-          //   ProductName: updatedValue.ProductName,
-          //   Company: updatedValue.Company,
-          //   Price: updatedValue.Price,
-          //   ProductLink: updatedValue.ProductLink,
-          //   LinkShop: updatedValue.LinkShop,
-          // },
-          // },
-          { returnDocument: "after" }
-        )
+        db
+          .collection(productsCollectionName)
+          .findOneAndUpdate(
+            { _id: ObjectId(id) },
+            { $set: updateProduct },
+            { returnDocument: "after" }
+          )
       )
       .then((result) => {
-        if (result.ok === 1) resolve(result.value);
-        else reject({ msg: "Error updating product" });
-      })
-      .catch((err) => reject(err));
+        console.log(result);
+        resolve(result.value);
+      });
   });
 }
 
@@ -74,6 +67,6 @@ module.exports = {
   getAllProducts,
   addProduct,
   getProductById,
-  updateProductById,
+  updateProduct,
   deleteProductById,
 };

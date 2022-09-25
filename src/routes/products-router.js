@@ -1,7 +1,7 @@
 const express = require("express");
 const { addProduct } = require("../use-cases/add-product");
 const { showProducts } = require("../use-cases/show-products");
-const { editProduct } = require("../use-cases/edit-product");
+const { updateProductById } = require("../use-cases/update-product");
 const { showProductDetails } = require("../use-cases/show-product-details");
 const { deleteProduct } = require("../use-cases/delete-product");
 
@@ -43,10 +43,18 @@ productsRouter.post("/add", (req, res) => {
     });
 });
 
-// productsRouter.edit("/edit:id", (req, res) => {
-//   const productId = req.params.id
-
-// })
+productsRouter.put("/edit/:id", (req, res) => {
+  const productId = req.params.id;
+  const updateProduct = req.body;
+  console.log("file", req.file);
+  if (req.file) {
+    updateProduct.filename = req.file.filename;
+  }
+  updateProductById(productId, updateProduct)
+    .then((updatedElement) => res.json(updatedElement))
+    .catch((err) => console.log(err));
+  console.log(req.body);
+});
 
 productsRouter.delete("/delete/:id", (req, res) => {
   const productId = req.params.id;
