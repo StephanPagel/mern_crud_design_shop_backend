@@ -1,15 +1,17 @@
 const { ObjectId } = require("mongodb");
 const { getDB } = require("./getDB");
 
+const productsCollectionName = "shop-products";
+
 async function getAllProducts() {
   const db = await getDB();
-  const products = await db.collection("shop-products").find().toArray();
+  const products = await db.collection(productsCollectionName).find().toArray();
   return products;
 }
 
 async function addProduct(product) {
   const db = await getDB();
-  const result = await db.collection("shop-products").insertOne(product);
+  const result = await db.collection(productsCollectionName).insertOne(product);
   try {
     if (result.acknowledged === true && result.insertedId) {
       return {
@@ -17,7 +19,7 @@ async function addProduct(product) {
         ...product,
       };
     } else {
-      return result;
+      return reject(result);
     }
   } catch (err) {
     console.log(err);
@@ -29,26 +31,26 @@ async function addProduct(product) {
 
 async function getProductById(id) {
   const db = await getDB();
-  return db.collection("shop-products").findOne({
+  return db.collection(productsCollectionName).findOne({
     _id: ObjectId(id),
   });
 }
 
-function updateProductById(id, updatedValue) {
+function updateProductById(id, updatedProduct) {
   return new Promise((resolve, reject) => {
     getDB()
       .then((db) =>
-        db.collection("shop-products").findOneAndUpdate(
+        db.collection(productsCollectionName).findOneAndUpdate(
           { _id: ObjectId(id) },
-          {
-            $set: {
-              ProductName: updatedValue.ProductName,
-              Company: updatedValue.Company,
-              Price: updatedValue.Price,
-              ProductLink: updatedValue.ProductLink,
-              LinkShop: updatedValue.LinkShop,
-            },
-          },
+          { $set: updatedProduct },
+          // $set: {
+          //   ProductName: updatedValue.ProductName,
+          //   Company: updatedValue.Company,
+          //   Price: updatedValue.Price,
+          //   ProductLink: updatedValue.ProductLink,
+          //   LinkShop: updatedValue.LinkShop,
+          // },
+          // },
           { returnDocument: "after" }
         )
       )
@@ -60,9 +62,18 @@ function updateProductById(id, updatedValue) {
   });
 }
 
+function deleteProductById(id) {
+  return new Promise(() => {
+    getDB().then((db) => {
+      db.collection(productsCollectionName).deleteOne({ _id: ObjectId(id) });
+    });
+  });
+}
+
 module.exports = {
   getAllProducts,
   addProduct,
   getProductById,
   updateProductById,
+  deleteProductById,
 };
